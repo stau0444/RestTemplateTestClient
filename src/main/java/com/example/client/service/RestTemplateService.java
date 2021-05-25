@@ -1,24 +1,20 @@
 package com.example.client.service;
 
-import com.example.client.dto.Product;
-import com.example.client.dto.Req;
-import com.example.client.dto.UserRequest;
-import com.example.client.dto.UserResponse;
-import org.apache.catalina.User;
+import com.example.client.dto.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.net.http.HttpClient;
+import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 
+@Slf4j
 @Service
 public class RestTemplateService {
 
@@ -197,5 +193,34 @@ public class RestTemplateService {
 
         //getBody() 는 reponseEntity의 응답 body이며 , getrBody는 그 응답바디 안의 필드명이다.
         return response.getBody();
+    }
+
+    public SearchResult naverApiTest() throws CharacterCodingException {
+
+
+       
+        URI uri = UriComponentsBuilder
+                .fromUriString("https://openapi.naver.com")
+                .path("/v1/search/local.json")
+                .queryParam("query","약국")
+                .queryParam("display",3)
+                .queryParam("start", 2)
+                .queryParam("sort","random")
+                .encode()
+                .build()
+                .toUri();
+
+        RequestEntity requestEntity = RequestEntity
+                .get(uri)
+                .header("X-Naver-Client-Id","wjnILe9futyWo28v1IXl")
+                .header("X-Naver-Client-Secret","kfiv6pPXaa")
+                .build();
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        ResponseEntity<SearchResult> searchList = restTemplate.exchange(requestEntity, SearchResult.class);
+        log.info("uri:{}",uri);
+        log.info("searchList:{}",searchList.getBody());
+        return searchList.getBody();
     }
 }
