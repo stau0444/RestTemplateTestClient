@@ -1,17 +1,22 @@
 package com.example.client.service;
 
+import com.example.client.dto.Product;
 import com.example.client.dto.Req;
 import com.example.client.dto.UserRequest;
 import com.example.client.dto.UserResponse;
+import org.apache.catalina.User;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.net.http.HttpClient;
 import java.nio.charset.Charset;
 
 @Service
@@ -20,9 +25,10 @@ public class RestTemplateService {
     //Server로 요청을 보내는 서비스이다 .
     //http://localhost/api/server/hello 로 요청을 할 것이다.
     
-    
+
     //1.get방식 요청
     public UserResponse hello(UserResponse userResponse){
+
 
         //URI를 빌드한다
         URI uri = UriComponentsBuilder
@@ -36,6 +42,7 @@ public class RestTemplateService {
         System.out.println(uri.toString());
 
         RestTemplate restTemplate = new RestTemplate();
+
 
         //String result = restTemplate.getForObject(uri, String.class);
         //getForEntity는 응답을 ResponseEntity로 받을 수 있도록 해준다 .
@@ -53,11 +60,11 @@ public class RestTemplateService {
 
         URI uri =UriComponentsBuilder
                 .fromUriString("http://localhost:9090")
-                .path("/api/server/user/{userId}/name/{username}")
+                .path("/api/server/user-test/{userId}/name/{username}")
                 .encode()
                 .build()
                 //pathVariable사용을 위한 메소드 순서대로 들어간다.
-                .expand("100","ugo")
+                .expand(100,"ugo")
                 .toUri();
         System.out.println(uri);
 
@@ -144,10 +151,10 @@ public class RestTemplateService {
           위와 같은 API를 디자인하는 방법은 아래의 메소드와 같다.
     */
 
-    public Req<UserResponse> genericExchange(){
+    public Req<Product> genericExchange(){
         URI uri =UriComponentsBuilder
                 .fromUriString("http://localhost:9090")
-                .path("/api/server/user/{userId}/name/{username}")
+                .path("/api/server/generic-exchange/{userId}/name/{username}")
                 .encode()
                 .build()
                 //pathVariable사용을 위한 메소드 순서대로 들어간다.
@@ -159,16 +166,19 @@ public class RestTemplateService {
         //http body - object - object mapper -> json - > http body json
 
 
-        UserRequest body = new UserRequest();
-        body.setName("ugo");
-        body.setAge(20);
 
-        Req<UserRequest> req= new Req<>();
+
+        Product product = new Product();
+        product.setProductName("에어컨");
+        product.setPrice("3000만원");
+
+        Req<Product> req= new Req<>();
         req.setHeader(new Req.Header());
-        req.setResBody(body);
+        req.setResBody(product);
+
 
         //RequestEntity 생성
-        RequestEntity<Req<UserRequest>> requestEntity = RequestEntity
+        RequestEntity<Req<Product>> requestEntity = RequestEntity
                 //요청 방식 정한다
                 .post(uri)
                 //타입
@@ -182,7 +192,7 @@ public class RestTemplateService {
         RestTemplate restTemplate = new RestTemplate();
         //제네릭엔 클래스를 붙힐 수없다
         //아래처럼 ParameterizedTypeReference로 한번 감싸 타입을 갖게 한다.
-        ResponseEntity<Req<UserResponse>> response
+        ResponseEntity<Req<Product>> response
                 = restTemplate.exchange(requestEntity,new ParameterizedTypeReference<>(){});
 
         //getBody() 는 reponseEntity의 응답 body이며 , getrBody는 그 응답바디 안의 필드명이다.
